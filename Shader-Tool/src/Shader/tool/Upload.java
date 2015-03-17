@@ -14,6 +14,7 @@ import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.ResetCommand;
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -24,6 +25,7 @@ import org.eclipse.jgit.api.errors.NoMessageException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
+import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.UnmergedPathException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
@@ -388,6 +390,30 @@ class Upload{
          		
          	    Git git = new Git(repository);
          	    
+         	  Status status;
+			try {
+				status = git.status().call();
+				
+				System.out.println("Added: " + status.getAdded());
+	         	  System.out.println("Changed: " + status.getChanged());
+	         	  System.out.println("Conflicting: " + status.getConflicting());
+	         	  System.out.println("ConflictingStageState: " + status.getConflictingStageState());
+	         	  System.out.println("IgnoredNotInIndex: " + status.getIgnoredNotInIndex());
+	         	  System.out.println("Missing: " + status.getMissing());
+	         	  System.out.println("Modified: " + status.getModified());
+	         	  System.out.println("Removed: " + status.getRemoved());
+	         	  System.out.println("Untracked: " + status.getUntracked());
+	         	  System.out.println("UntrackedFolders: " + status.getUntrackedFolders());
+			} catch (NoWorkTreeException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (GitAPIException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+         	  
+
+         	    
          	   /*
          	    try {
 					git.rm().addFilepattern("ShaderData/"+a1+"/"+ a1+".pde")
@@ -505,8 +531,11 @@ class Upload{
             			
             			System.out.println("Cuenta algo" + sketch11 + sketch111);
             			//
-                 	
+                 		
                  		*/
+            			
+            			//sketch.handleNewCode();
+            			//sketch.reload(); Carga Tabs
             			
              		}catch(Exception excp){
             		}

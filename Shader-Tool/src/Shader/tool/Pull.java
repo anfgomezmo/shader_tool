@@ -69,7 +69,7 @@ class Pull {
 		final File dir = new File(repo);
 		
 		String url = "https://github.com/Shadertool/shaderdb.git";
-
+/* /////
 		//CLONE REMOTE
 		
         File localPath = File.createTempFile("TestGitRepository", "");
@@ -88,7 +88,7 @@ class Pull {
                 .readEnvironment() // scan environment GIT_* variables
                 .findGitDir() // scan up the file system tree
                 .build();
-        
+  */    /////  
         //Repo Local
         
         FileRepositoryBuilder builder1 = new FileRepositoryBuilder();
@@ -112,7 +112,7 @@ class Pull {
         
        
         
-        Git gitremote = new Git(repository);
+       // Git gitremote = new Git(repository); /////
         
      
         
@@ -172,10 +172,35 @@ class Pull {
         //repository.close();
         //repositorylocal.close();
 		
-        String a = localPath.toString()+"/ShaderData/";
-        File sourcepath = new File(a);
+        //String a = localPath.toString()+"/ShaderData/"; ////
+        //File sourcepath = new File(a); /////
         String b = repo+"/ShaderData/";
         File local = new File(b);
+        
+        
+      //PUSH N
+        
+        
+        PushCommand pc = gitlocal.push();
+		pc.setCredentialsProvider(cp)
+		.setForce(true)
+		.setPushAll();
+		Iterator<PushResult> it;
+		try {
+			it = pc.call().iterator();
+			if(it.hasNext()){
+				System.out.println(it.next().toString());
+				}
+		} catch (TransportException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GitAPIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}//End Push 
+    	
+        
+        
         if (result.contains("Already-up-to-date")){
         	JOptionPane.showMessageDialog(null,
 				     "Already up to date"
@@ -184,7 +209,15 @@ class Pull {
 				 	    JOptionPane.WARNING_MESSAGE); //Tipo de mensaje
         }else{
         	
-
+        	try {
+				Index index = new Index(pathos, null);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	
+        	
+        	/*/////
         	
         	copyFolder(sourcepath, local);
         	try {
@@ -262,6 +295,7 @@ class Pull {
     	        in.close();
     	        out.close();
     	        System.out.println("File copied from " + src + " to " + dest);
+    	*/ /////
     	}
     }
 	

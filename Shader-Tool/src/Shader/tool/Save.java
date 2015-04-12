@@ -1,17 +1,21 @@
 package Shader.tool;
 
+import java.awt.List;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import processing.app.Base;
 import processing.app.Editor;
 import processing.app.Sketch;
+import processing.app.SketchCode;
 
 class Save{
 	
@@ -68,9 +72,36 @@ class Save{
             e.printStackTrace();
         }
         
-     		       
-	        
-	        // CODE PDE TO SKETCH
+     	
+        //IF TABS EXISTS
+        
+        String tabs = shaderse +"/Tabs";
+        Path pathtab = Paths.get(tabs);
+        
+        if (Files.exists(pathtab)) {
+        	File destFolder1 = editor.getSketch().getFolder();
+    		
+    		String pathtab1 =  shaderse +"/Tabs";
+    		File srcFolder1 = new File(pathtab1);
+    		
+    		//copyFolder(srcFolder,destFolder);
+
+    		
+    		try{
+            	copyFolder(srcFolder1,destFolder1);
+               }catch(IOException e){
+            	e.printStackTrace();
+            	//error, just exit
+                    //System.exit(0);
+              
+        }
+    		editor.getSketch().reload();
+        }
+        
+        
+	    
+        
+        // CODE PDE TO SKETCH
 	          	
 	        	
 		
@@ -84,6 +115,9 @@ class Save{
 			File sketchFolder = sketch.getFolder();
 			File sketchbookFolder = Base.getSketchbookFolder();
 			String filename = null;
+			
+			//SketchCode[] pdetab = sketch.getCode();
+			//pdetab[0].setProgram(pdecode);
 			
 		}
 		catch(Exception excp){
@@ -104,6 +138,8 @@ class Save{
         	//error, just exit
                 //System.exit(0);
            }
+	
+
 		
 	}// PUBLIC SAVE	
 

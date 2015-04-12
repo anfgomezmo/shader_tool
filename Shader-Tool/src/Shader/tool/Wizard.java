@@ -8,7 +8,9 @@ import Shader.tool.Save;
 
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
@@ -16,6 +18,7 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -34,11 +37,14 @@ import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
@@ -46,6 +52,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingWorker;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -61,6 +69,7 @@ import org.eclipse.jgit.errors.NoWorkTreeException;
 import processing.app.Base;
 import processing.app.Editor;
 import processing.app.Sketch;
+import processing.app.SketchCode;
 
 
 
@@ -72,7 +81,7 @@ public class Wizard  {
 	JList list;
 	JTable table;
 	String newline = "\n";
-	String descrip = "Welcome to Shader Tool"; 
+	String descrip = "Welcome to ShaderBase"; 
 	ListSelectionModel listSelectionModel;
 	//String[] listadata = {"hola1", "hola2", "hola3","hola4"};
 	String[] listadata = null;
@@ -91,7 +100,7 @@ public class Wizard  {
 	boolean updatecheck;
 	
 	final JLabel picLabel = new JLabel();
-    final static String BUTTONPANEL = "Shader List";
+    final static String BUTTONPANEL = "Download";
     final static String TEXTPANEL = "Upload";
     final static String TEXTPANEL1 = "Update";
     final static int extraWindowWidth = 100;
@@ -107,10 +116,12 @@ public class Wizard  {
     String[] searchid2 = null;
     String[] searchnames2 = null;
     String[] searchfolder2 = null;
+    
    
     
     public Wizard(Editor editor) {
     	this.editor = editor;
+    	
     	
     	    	
     	// TODO Auto-generated constructor stub
@@ -151,12 +162,11 @@ public class Wizard  {
                     "Choose", 
                     JOptionPane.YES_NO_OPTION); 
 			if (selectedOption == JOptionPane.YES_OPTION) {
-				
-								
+						
 				try {
 					
 					updatecheck = true; 
-				
+									
 					Pull pull = new Pull(pathos, editor);
 					
 					
@@ -176,7 +186,7 @@ public class Wizard  {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				} 
-           	
+				
 				
 				
 				String searchin1 = "shader";
@@ -189,7 +199,7 @@ public class Wizard  {
 				//Pull pull = new Pull(null, pathos); (Falla Encabezado revisar como aconsejo grupo jgit Eclipse)
 				
 				//NO UPDATE
-				JOptionPane.showMessageDialog(null,"Shader Tool will save in the local machine only",
+				JOptionPane.showMessageDialog(null,"ShaderBase will Upload any shader after next update",
 				    "Inane warning",
 				    JOptionPane.WARNING_MESSAGE);
 				
@@ -212,16 +222,45 @@ public class Wizard  {
 			
 			//default title and icon
 			JOptionPane.showMessageDialog(null,
-			    "Shader Tool will download the shaders info, could take some minutes");
+			    "ShaderBase will download the shaders info, could take some minutes");
 			
 			//int selectedOption = JOptionPane.showConfirmDialog(null, 
             //        "Shader Tool needs to download all the repo data in order to continue", 
             //        "Choose", 
             //        JOptionPane.YES_NO_OPTION); 
 			//if (selectedOption == JOptionPane.YES_OPTION) {
+			
+			//JProgressBar aJProgressBar = new JProgressBar(JProgressBar.HORIZONTAL);
+			//final JFrame frame = new JFrame("Stepping Progress");
+			//final JDialog dlg = new JDialog(frame, "Progress Dialog", true);	
+			//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			//aJProgressBar.setIndeterminate(true);
+			//dlg.add(BorderLayout.CENTER, aJProgressBar);
+		    //aJProgressBar.setStringPainted(true);
+		    
+
+		    //frame.add(aJProgressBar);
+		    
+		    //frame.setSize(400, 20);
+		    //frame.setLocationRelativeTo(null);
+		    //frame.setUndecorated(true);			   
+		    //frame.setVisible(true);
+		    
 				
+		    //Thread t = new Thread(new Runnable() {
+		     //   public void run() {
+		       //   frame.setVisible(true);
+		        //}
+		   //   });
+		    
+		   //Toolkit toolkit = Toolkit.getDefaultToolkit();
+			//toolkit.setCursor (Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 				//Ini??
 				
+		    //t.start();
+				
+			
+			
 				Clone clone = new Clone(null, pathos); //Clone Git
 				Index index = new Index(pathos, null); //Index Lucene
 				Search search1 = new Search(searchid2, searchnames2, editor, pathos, searchfolder2, searchin);
@@ -232,10 +271,12 @@ public class Wizard  {
 		        
 		        listadata = search1.searchnames;
 		        prueba =  search1.searchfolder;
+		      //  frame.setVisible(false);
+				
 				
 			//}else {
 				
-			
+		        
 			//}
 		}
         
@@ -268,11 +309,15 @@ public class Wizard  {
         JPanel topHalf = new JPanel();
         topHalf.setLayout(new BoxLayout(topHalf, BoxLayout.LINE_AXIS));
         JPanel listContainer = new JPanel(new GridLayout(1,1));
-        listContainer.setBorder(BorderFactory.createTitledBorder(
-                                                "Shader List"));
+        //listContainer.setBorder(BorderFactory.createTitledBorder("Shader List"));
+        //TitledBorder title;
+        //title = BorderFactory.createTitledBorder(null, "Shader List");
+        //title.setTitlePosition(TitledBorder.TOP);
+		//listContainer.setBorder(title);
+               
         listContainer.add(listPane);
          
-        topHalf.setBorder(BorderFactory.createEmptyBorder(5,5,0,5));
+        //topHalf.setBorder(BorderFactory.createEmptyBorder(5,5,0,5));
         topHalf.add(listContainer);
         //topHalf.add(tableContainer);
  
@@ -327,44 +372,131 @@ public class Wizard  {
         save.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             	
+            
             	String sketchcode = null;
             	boolean check;
             	editor.getBase();
             	editor.getBase();
     			//System.out.println(pdecode);
-    			sketchcode = editor.getText();	
+    			//sketchcode = editor.getText();	
+    			
+    			Editor editor2 = editor.getBase().getActiveEditor();
+    			
+    			Sketch sketch = editor2.getSketch();
+	        	File sketchFolder = sketch.getFolder();
+    			String folderpath = sketchFolder.toString();
+    			File Folder = new File(folderpath+"/data");
+    			File Folder1 = new File(folderpath);
+    			String maintab = sketch.getName();
+    			//System.out.println(maintab);
+    			int numtab = sketch.getCodeCount();
+    			SketchCode[] tabs = sketch.getCode();
+    			
+    			
+    			
+    			
+    			if(numtab>1)
+    			{
+    				
+    				editor2.getSketch().handleNextCode();
+    				sketchcode = editor2.getSketch().getMainProgram();	
+    				
+    			
+    			}else{
+    				
+    				sketchcode = editor2.getText();
+    			
+    			}
+    			
+    			
     			if (sketchcode.isEmpty()){
             	            	
-    				Save save = new Save(shaderse,editor,shadersename); 
+    				Save save = new Save(shaderse,editor2,shadersename); 
     				System.out.println("Loading .....");
     			
     			}else{
     				
+    				/*Code to load the shader in a new sketch if the sketch has code
+    				 * 
+    				 */
+    				
+    				//
+                	
+    				
+    				
+    				editor2.getBase().handleNew();
+            		
+            		java.util.List<Editor> editorlist = editor.getBase().getEditors();
+            		Editor editornew = editorlist.get(editorlist.size()-1);
+            		//String testnew = editornew.getSketch().getFolder().toString();
+            		//System.out.println(testnew);
+                	
+            		Save save = new Save(shaderse,editornew,shadersename); 
+    				System.out.println("Loading .....");
+                	//
+    				
+    				
+    				/* Code to load the shader in the same skecth always
+    				 * 
+    				 * 
     				int selectedOption1 = JOptionPane.showConfirmDialog(null,  
-    						 "The sketch has a code if you proceed \n"
+    						 "The sketch has a code already,\n"
     						 + "the code will be deleted\n"
-    		    			 + "Do you want to continue?", 
+    		    			 + "Do you want to continue???", 
     		                 "Choose",
     		                 JOptionPane.WARNING_MESSAGE,
     		                 JOptionPane.YES_NO_OPTION); 
     				
     		        if (selectedOption1 == JOptionPane.YES_OPTION) {
     				
-    		        	Sketch sketch = editor.getSketch();
-    		        	File sketchFolder = sketch.getFolder();
-            			String folderpath = sketchFolder.toString();
-            			File Folder = new File(folderpath+"/data");
+    		       // editor.handleSave(true);
+    		        	//editor.
+    		        	
+            			if(numtab>1){
+            				
+            				
+            				
+            				File dir = sketchFolder;
+            				String[] dirinfo = dir.list();
+            				for (int x=0;x<dirinfo.length;x++){
+            					 if(dirinfo[x].contains(maintab)){
+            						 
+            					 }else{ 
+            						 if(dirinfo[x].contains(".pde")){
+            					 	 Path path = Paths.get(folderpath+"/"+dirinfo[x]);
+            						 //System.out.println(path);
+            						 try {
+										Files.deleteIfExists(path);
+									} catch (IOException e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									}
+            					 
+            						 }
+                 					
+            						 }
+            				}
+        					
+            				
+            				//for(int x=1;x<numtab;x++){
+            					
+            				//}
+            			}
+            			
             			try {
 							FileUtils.cleanDirectory(Folder);
+							//FileUtils.cleanDirectory(Folder1);
 						} catch (IOException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}   
-    					
+            			sketch.reload();
             			Save save = new Save(shaderse,editor,shadersename); 
         				System.out.println("Loading .....");
     					
     				}
+    			*/
+    			
     			}
     			
     			
@@ -627,8 +759,10 @@ public class Wizard  {
             if (sourceTabbedPane.getTitleAt(index)=="Upload");
             {
             
+            	//Editor editor2 = editor.getBase().getActiveEditor();
             	
-        		if (updatecheck == true){
+            	
+        		//if (updatecheck == true){
                 	
             		          		
             	 	try {
@@ -644,9 +778,9 @@ public class Wizard  {
     					e1.printStackTrace();
     				} 
             		
-            	}
+            	//}
             	
-            	
+            	/*
             	if (updatecheck == false){
             		
             		
@@ -665,7 +799,7 @@ public class Wizard  {
             		
             		
             	}
-            	
+            	*/
           
             }
             
@@ -745,7 +879,7 @@ public class Wizard  {
             picLabel.setIcon(one);
             
             
-           
+            
           picLabel.setIcon( new ImageIcon(rpta));
           labelText = descrip;
            // labelText = "Hola";
@@ -947,12 +1081,39 @@ public class Wizard  {
 	 
 	 
 	public static BufferedImage resize(BufferedImage image, int width, int height) {
-		    BufferedImage bi = new BufferedImage(width, height, BufferedImage.TRANSLUCENT);
-		    Graphics2D g2d = (Graphics2D) bi.createGraphics();
+		int original_width = image.getWidth();
+	    int original_height = image.getHeight();
+	    int bound_width = width;
+	    int bound_height = height;
+	    int new_width = original_width;
+	    int new_height = original_height;
+	    
+	    // first check if we need to scale width
+	    if (original_width > bound_width) {
+	        //scale width to fit
+	        new_width = bound_width;
+	        //scale height to maintain aspect ratio
+	        new_height = (new_width * original_height) / original_width;
+	    }
+
+	    // then check if we need to scale even with the new height
+	    if (new_height > bound_height) {
+	        //scale height to fit instead
+	        new_height = bound_height;
+	        //scale width to maintain aspect ratio
+	        new_width = (new_height * original_width) / original_height;
+	    }
+		
+			BufferedImage bi = new BufferedImage(new_width, new_height, BufferedImage.TRANSLUCENT);
+			BufferedImage bi2 = new BufferedImage(width, height, BufferedImage.TRANSLUCENT);
+			Graphics2D g2d = (Graphics2D) bi2.createGraphics();
 		    g2d.addRenderingHints(new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY));
-		    g2d.drawImage(image, 0, 0, width, height, null);
+		    int x = (width - bi.getWidth(null)) / 2;
+		    int y = (height - bi.getHeight(null)) / 2;
+		    g2d.drawImage(image, x, y, new_width, new_height, null);
 		    g2d.dispose();
-		    return bi;
+		    
+		    return bi2;
 	}//Resize image
 	 
 	
@@ -980,4 +1141,7 @@ public class Wizard  {
 		return (OS.indexOf("sunos") >= 0);
  
 	}//end Solaris
+	
+	
+	
 }//end wizard

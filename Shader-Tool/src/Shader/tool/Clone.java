@@ -8,6 +8,11 @@ import java.nio.file.Path;
 
 
 import java.util.Iterator;
+
+import javax.swing.JFrame;
+import javax.swing.JProgressBar;
+import javax.swing.ProgressMonitor;
+
 import processing.app.Editor;
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CloneCommand;
@@ -40,7 +45,7 @@ class Clone {
 		String name = "Shadertool";
 		String password = "1ergosum";
 		String url = "https://github.com/Shadertool/shaderdb.git";
-		 
+		
 		// credentials
 		CredentialsProvider cp = new UsernamePasswordCredentialsProvider(name, password);
 		// clone
@@ -49,6 +54,7 @@ class Clone {
 		.setCredentialsProvider(cp)
 		.setDirectory(dir)
 		.setURI(url);
+	
 		Git git = cc.call();
 		// add
 		AddCommand ac = git.add();

@@ -76,6 +76,7 @@ import static javax.swing.GroupLayout.Alignment.*;
 import processing.app.Base;
 import processing.app.Editor;
 import processing.app.Sketch;
+import processing.app.SketchCode;
 
 class UploadNU{
 	
@@ -83,6 +84,11 @@ class UploadNU{
 	String pdecode;
 	String imgpath = null;
 	String imgpathfinal;
+	int numtab;
+	String maintab;
+	File sketchfolder;
+	boolean multitab = false;
+	
 	
 	
 	private static Editor editor = null;
@@ -482,21 +488,36 @@ class UploadNU{
                 	 
                 	 //PDE CODE
                 	 
-             		try {
-            			editor.getBase();
-            			editor.getBase();
-            			//System.out.println(pdecode);
-            			pdecode = editor.getText();
-            			
-            			Sketch sketch = editor.getSketch();
-            			File sketchFolder = sketch.getFolder();
-            			File sketchbookFolder = Base.getSketchbookFolder();
-            			folderpath = sketchFolder.toString();
-            			
-            			System.out.println(folderpath);
-                 	
-             		}catch(Exception excp){
-            		}
+        	try {
+    			editor.getBase();
+    			editor.getBase();
+    			//System.out.println(pdecode);
+    			//pdecode = editor.getText();
+    			Sketch sketch = editor.getSketch();
+    			numtab = sketch.getCodeCount();
+    			
+    			if(numtab>1)
+    			{
+    				pdecode = editor.getSketch().getMainProgram();	
+    				multitab = true;
+    				
+    			
+    			}else{
+    				
+    				pdecode = editor.getText();
+    			
+    			}
+    			
+    			
+    			
+    			
+    			File sketchFolder = sketch.getFolder();
+    			
+    			File sketchbookFolder = Base.getSketchbookFolder();
+    			folderpath = sketchFolder.toString();
+    			
+     		}catch(Exception excp){
+    		}
             	
        //PDE CHECK
                		
@@ -609,7 +630,81 @@ class UploadNU{
 		}
 		catch(Exception excp){
 		}
-		
+			    
+			    ////MULTITAB
+			    
+			    if(multitab==true){
+			    	
+			    	//FOLDER MULTITAB
+					 				  
+					  
+					  File theDir3 = new File(repo+"/ShaderData/"+a1+"/Tabs");
+						System.out.println(repo+"/ShaderData/"+a1+"/Tabs");
+						  // if the directory does not exist, create it
+						if (!theDir3.exists()) {
+						    //System.out.println("creating directory: " + directoryName);
+						    boolean result = theDir3.mkdir();  
+
+						    if(result) {    
+						       System.out.println("DIR 3 created");  
+						    }
+						}
+					  
+			    	
+			    	
+			    	 for(int x=1;x<numtab;x++){
+			    		 
+			    		Sketch sketch = editor.getSketch();
+			    		SketchCode[] tabs = sketch.getCode();
+			    		sketch.handleNextCode();
+			    		String pdetab = tabs[x].getProgram();
+			    		String pdenametab = tabs[x].getFileName();
+			 	        String filenametab = pdenametab;
+            			
+            			
+            			
+            			if (!filenametab.endsWith(".pde")) {
+            			      filenametab += ".pde";
+            			    }
+
+            			   // File dirc = new File(repo+"/"+);
+            			    	    
+            			    String ftab = pdetab;
+            			    try{
+            			    
+            			    	System.gc();
+            		        try {
+            						Thread.sleep(2000);
+            					} catch (InterruptedException e) {
+            						// TODO Auto-generated catch block
+            						e.printStackTrace();
+            					}	 	
+            			    File fileTemp = new File(theDir3, filenametab);
+            			    if (fileTemp.exists()){
+            			    fileTemp.delete();
+            			    }  
+            			    
+            			    
+            			    BufferedWriter bw = new BufferedWriter(new FileWriter(new File(theDir3, filenametab
+            		                ), true));
+            			    bw.write(ftab);
+            		        bw.newLine();
+            		        bw.close();
+            		        
+            			
+            		}
+            		catch(Exception excp){
+            		}
+            			
+            			
+			 	        }
+			 	        
+			 	}
+			    	
+			    //END 	MULTITAB
+				    
+			    
+			    
 	    //DATA
 	    
 	    File dirdata = new File(folderpath + "/data");
@@ -702,6 +797,20 @@ class UploadNU{
 				  //  System.out.println(dirdatainfo[x]);
 			        	}
 			
+			 //MULTITAB
+			 
+			 if(multitab==true){
+		     File dirtab = new File(repo+"/ShaderData/"+a1+"/Tabs");
+			 String[] dirtabinfo = dirtab.list();
+			 for (int x=0;x<dirtabinfo.length;x++){
+				 	git.add()
+			        .addFilepattern("ShaderData/"+a1+"/Tabs/"+ dirtabinfo[x])
+			        .call();
+				  //  System.out.println(dirdatainfo[x]);
+			        }
+			 }
+			 
+			 
 			//IMG
 			 git.add()
 		        .addFilepattern("ShaderData/"+a1+"/"+ a1+".jpg")
@@ -820,208 +929,313 @@ class UploadNU{
             
         }//else 
         else {//ADD LOCAL
-		
-		String a2 = a1+" (LOCAL)";
-		a1=a2;
-		boolean checklocal;
-		
-		if (Arrays.asList(allnames).contains(a1)){
-			
-		int selectedOptionB = JOptionPane.showConfirmDialog(null,  
-	    "The shader already exists. Do you want to edit it??", 
-	    "Name Conflict", 
-	    JOptionPane.YES_NO_OPTION); 
-	    if (selectedOptionB == JOptionPane.YES_OPTION) {
-	     checklocal = true;
-	    }else{
-	    	checklocal = false;
-	    	JOptionPane.showMessageDialog(null,
-				     "Change the name of the shader and try again"
-				 , //Mensaje
-				 	    "Change Name", //Title
-				 	    JOptionPane.WARNING_MESSAGE); //Message
-	    }
-	    	
-	    }else {
-	    checklocal = true;
-	    }
-	    
-	    if (checklocal==true){
-	    
-	    	
-	    	try {
-    			editor.getBase();
-    			editor.getBase();
-    			//System.out.println(pdecode);
-    			pdecode = editor.getText();
+    		
+    		String a2 = a1+" (LOCAL)";
+    		a1=a2;
+    		boolean checklocal;
+    		
+    		if (Arrays.asList(allnames).contains(a1)){
     			
-    			Sketch sketch = editor.getSketch();
-    			File sketchFolder = sketch.getFolder();
-    			File sketchbookFolder = Base.getSketchbookFolder();
-    			folderpath = sketchFolder.toString();
+    		int selectedOptionB = JOptionPane.showConfirmDialog(null,  
+    	    "The shader already exists. Do you want to edit it??", 
+    	    "Name Conflict", 
+    	    JOptionPane.YES_NO_OPTION); 
+    	    if (selectedOptionB == JOptionPane.YES_OPTION) {
+    	     checklocal = true;
+    	    }else{
+    	    	checklocal = false;
+    	    	JOptionPane.showMessageDialog(null,
+    				     "Change the name of the shader and try again"
+    				 , //Mensaje
+    				 	    "Change Name", //Title
+    				 	    JOptionPane.WARNING_MESSAGE); //Message
+    	    }
+    	    	
+    	    }else {
+    	    checklocal = true;
+    	    }
+    	    
+    	    if (checklocal==true){
+    	    
+    	    	
+    	    	try {
+        			editor.getBase();
+        			editor.getBase();
+        			//System.out.println(pdecode);
+        			//pdecode = editor.getText();
+        			Sketch sketch = editor.getSketch();
+        			numtab = sketch.getCodeCount();
+        			
+        			if(numtab>1)
+        			{
+        				pdecode = editor.getSketch().getMainProgram();	
+        				multitab = true;
+        				
+        			
+        			}else{
+        				
+        				pdecode = editor.getText();
+        			
+        			}
+        			
+        			
+        			
+        			
+        			File sketchFolder = sketch.getFolder();
+        			
+        			File sketchbookFolder = Base.getSketchbookFolder();
+        			folderpath = sketchFolder.toString();
+        			
+        		
+         		}catch(Exception excp){
+        		}
+        	
+    	    	 //PDE CHECK
+           		
+    	   if(pdecode.contains("PShader")){
+
+    		//FOLDERS
+    		
+    		File theDir = new File(repo+"/ShaderData/"+a1);
+    		 System.out.println(repo+"/ShaderData/"+a1);
+    		  // if the directory does not exist, create it
+    		  if (!theDir.exists()) {
+    		    //System.out.println("creating directory: " + directoryName);
+    		    boolean result = theDir.mkdir();  
+
+    		     if(result) {    
+    		       System.out.println("DIR created");  
+    		     }
+    		  }
+    		  
+    		  File theDir2 = new File(repo+"/ShaderData/"+a1+"/Code");
+    			 System.out.println(repo+"/ShaderData/"+a1+"/Code");
+    			  // if the directory does not exist, create it
+    			  if (!theDir2.exists()) {
+    			    //System.out.println("creating directory: " + directoryName);
+    			    boolean result = theDir2.mkdir();  
+
+    			     if(result) {    
+    			       System.out.println("DIR 2 created");  
+    			     }
+    			  }
+    		
+    		
+            	  
+    		//TXT FILE
+    		
+    			  
+    			  
+    		PrintWriter writer;
+    		try {
+    			writer = new PrintWriter(repo+"/ShaderData/"+a1+"/"+a1+".txt", "UTF-8");
     			
-    			System.out.println(folderpath);
-         	
-     		}catch(Exception excp){
+    			writer.println("Name:");
+    			writer.println(namet.getText());
+    			writer.println("Tags:");
+    			writer.println("shader, "+ tagt.getText());
+    			writer.println("Description:");
+    			writer.println(dest.getText());
+    			writer.println("Autor:");
+    			writer.println(authort.getText());
+    			writer.println("Email:");
+    			writer.println(emailt.getText());
+    			writer.close();
+    		} catch (FileNotFoundException e3) {
+    			// TODO Auto-generated catch block
+    			e3.printStackTrace();
+    		} catch (UnsupportedEncodingException e3) {
+    			// TODO Auto-generated catch block
+    			e3.printStackTrace();
     		}
-		//FOLDERS
-		
-		File theDir = new File(repo+"/ShaderData/"+a1);
-		 System.out.println(repo+"/ShaderData/"+a1);
-		  // if the directory does not exist, create it
-		  if (!theDir.exists()) {
-		    //System.out.println("creating directory: " + directoryName);
-		    boolean result = theDir.mkdir();  
+    		
+    		
+    		
+    	        // PDE FILE
+    	          	
+    	        	
+    		
 
-		     if(result) {    
-		       System.out.println("DIR created");  
-		     }
-		  }
-		  
-		  File theDir2 = new File(repo+"/ShaderData/"+a1+"/Code");
-			 System.out.println(repo+"/ShaderData/"+a1+"/Code");
-			  // if the directory does not exist, create it
-			  if (!theDir2.exists()) {
-			    //System.out.println("creating directory: " + directoryName);
-			    boolean result = theDir2.mkdir();  
+    		String filename = a1;
+    			
+    	
+    			
+    			if (!filename.endsWith(".pde")) {
+    			      filename += ".pde";
+    			    }
 
-			     if(result) {    
-			       System.out.println("DIR 2 created");  
-			     }
-			  }
-		
-		
-        	  
-		//TXT FILE
-		
-			  
-			  
-		PrintWriter writer;
-		try {
-			writer = new PrintWriter(repo+"/ShaderData/"+a1+"/"+a1+".txt", "UTF-8");
-			
-			writer.println("Name:");
-			writer.println(namet.getText());
-			writer.println("Tags:");
-			writer.println("shader, "+ tagt.getText());
-			writer.println("Description:");
-			writer.println(dest.getText());
-			writer.println("Autor:");
-			writer.println(authort.getText());
-			writer.println("Email:");
-			writer.println(emailt.getText());
-			writer.close();
-		} catch (FileNotFoundException e3) {
-			// TODO Auto-generated catch block
-			e3.printStackTrace();
-		} catch (UnsupportedEncodingException e3) {
-			// TODO Auto-generated catch block
-			e3.printStackTrace();
-		}
-		
-		
-		
-	        // PDE FILE
-	          	
-	        	
-		
+    			   // File dirc = new File(repo+"/"+);
+    			    	    
+    			    String f = pdecode;
+    			    try{
+    				    
+    			    	System.gc();
+    		        try {
+    						Thread.sleep(2000);
+    					} catch (InterruptedException e) {
+    						// TODO Auto-generated catch block
+    						e.printStackTrace();
+    					}	 	
+    			    File fileTemp = new File(theDir, filename);
+    			    if (fileTemp.exists()){
+    			    fileTemp.delete();
+    			    }  
+    			    
+    			    
+    			    BufferedWriter bw = new BufferedWriter(new FileWriter(new File(theDir, filename
+    		                ), true));
+    			    bw.write(f);
+    		        bw.newLine();
+    		        bw.close();
+    		        
+    			
+    		}
+    		catch(Exception excp){
+    		}
+    		
+    		
+    			    ////MULTITAB
+    			    
+    			    if(multitab==true){
+    			    	
+    			    	//FOLDER MULTITAB
+    					 				  
+    					  
+    					  File theDir3 = new File(repo+"/ShaderData/"+a1+"/Tabs");
+    						System.out.println(repo+"/ShaderData/"+a1+"/Tabs");
+    						  // if the directory does not exist, create it
+    						if (!theDir3.exists()) {
+    						    //System.out.println("creating directory: " + directoryName);
+    						    boolean result = theDir3.mkdir();  
 
-		String filename = a1;
-			
-	
-			
-			if (!filename.endsWith(".pde")) {
-			      filename += ".pde";
-			    }
+    						    if(result) {    
+    						       System.out.println("DIR 3 created");  
+    						    }
+    						}
+    					  
+    			    	
+    			    	
+    			    	 for(int x=1;x<numtab;x++){
+    			    		 
+    			    		Sketch sketch = editor.getSketch();
+    			    		SketchCode[] tabs = sketch.getCode();
+    			    		sketch.handleNextCode();
+    			    		String pdetab = tabs[x].getProgram();
+    			    		String pdenametab = tabs[x].getFileName();
+    			 	        String filenametab = pdenametab;
+                			
+                			
+                			
+                			if (!filenametab.endsWith(".pde")) {
+                			      filenametab += ".pde";
+                			    }
 
-			   // File dirc = new File(repo+"/"+);
-			    	    
-			    String f = pdecode;
-			    try{
-				    
-			    	System.gc();
-		        try {
-						Thread.sleep(2000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}	 	
-			    File fileTemp = new File(theDir, filename);
-			    if (fileTemp.exists()){
-			    fileTemp.delete();
-			    }  
-			    
-			    
-			    BufferedWriter bw = new BufferedWriter(new FileWriter(new File(theDir, filename
-		                ), true));
-			    bw.write(f);
-		        bw.newLine();
-		        bw.close();
-		        
-			
-		}
-		catch(Exception excp){
-		}
-		
-	    //DATA
-	    
-	    File dirdata = new File(folderpath + "/data");
-	    String[] dirdatainfo = dirdata.list();
-	    if (dirdatainfo == null){
-	    	JOptionPane.showMessageDialog(null,
-				     "The data folder is empty"
-				 , //Mensaje
-				 	    "No files in data folder", //Título
-				 	    JOptionPane.WARNING_MESSAGE); //Tipo de mensaje
-	        try {
-				throw new Exception("Data Folder empty");
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-	    	}
-	        else { 
-	        		try{
-	        			copyFolder(dirdata,theDir2);
-	        		}catch(IOException e){
-	        			e.printStackTrace();
-	        	
-	        		}
-	        	        	
-	        for (int x=0;x<dirdatainfo.length;x++){
-	        System.out.println(dirdatainfo[x]);
-	        	}
-	        
-	        }
-	    
-	    //IMG COPY
-	    
-	    File imgini = new File(imgpathfinal);
-	    File imgfinal = new File(repo+"/ShaderData/"+a1+"/"+ a1+ ".jpg");
-	    try {
-			FileUtils.copyFile(imgini, imgfinal);
-		} catch (IOException e3) {
-			// TODO Auto-generated catch block
-			e3.printStackTrace();
-		} 
-	    
-		
-	  //RE-INDEX
-		
-		try {
-			try {
-				Index index = new Index(pathos, null);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} catch (ParseException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}//End REINDEX
-	    
-		}
-	}//ADD LOCAL
+                			   // File dirc = new File(repo+"/"+);
+                			    	    
+                			    String ftab = pdetab;
+                			    try{
+                			    
+                			    	System.gc();
+                		        try {
+                						Thread.sleep(2000);
+                					} catch (InterruptedException e) {
+                						// TODO Auto-generated catch block
+                						e.printStackTrace();
+                					}	 	
+                			    File fileTemp = new File(theDir3, filenametab);
+                			    if (fileTemp.exists()){
+                			    fileTemp.delete();
+                			    }  
+                			    
+                			    
+                			    BufferedWriter bw = new BufferedWriter(new FileWriter(new File(theDir3, filenametab
+                		                ), true));
+                			    bw.write(ftab);
+                		        bw.newLine();
+                		        bw.close();
+                		        
+                			
+                		}
+                		catch(Exception excp){
+                		}
+                			
+                			
+    			 	        }
+    			 	        
+    			 	}
+    			    	
+    			    //END 	MULTITAB
+    			    
+    			    
+    	    //DATA
+    	    
+    	    File dirdata = new File(folderpath + "/data");
+    	    String[] dirdatainfo = dirdata.list();
+    	    if (dirdatainfo == null){
+    	    	JOptionPane.showMessageDialog(null,
+    				     "The data folder is empty"
+    				 , //Mensaje
+    				 	    "No files in data folder", //Título
+    				 	    JOptionPane.WARNING_MESSAGE); //Tipo de mensaje
+    	        try {
+    				throw new Exception("Data Folder empty");
+    			} catch (Exception e) {
+    				// TODO Auto-generated catch block
+    				e.printStackTrace();
+    			} 
+    	    	}
+    	        else { 
+    	        		try{
+    	        			copyFolder(dirdata,theDir2);
+    	        		}catch(IOException e){
+    	        			e.printStackTrace();
+    	        	
+    	        		}
+    	        	        	
+    	        for (int x=0;x<dirdatainfo.length;x++){
+    	        System.out.println(dirdatainfo[x]);
+    	        	}
+    	        
+    	        }
+    	    
+    	    //IMG COPY
+    	    
+    	    File imgini = new File(imgpathfinal);
+    	    File imgfinal = new File(repo+"/ShaderData/"+a1+"/"+ a1+ ".jpg");
+    	    try {
+    			FileUtils.copyFile(imgini, imgfinal);
+    		} catch (IOException e3) {
+    			// TODO Auto-generated catch block
+    			e3.printStackTrace();
+    		} 
+    	    
+    		
+    	  //RE-INDEX
+    		
+    		try {
+    			try {
+    				Index index = new Index(pathos, null);
+    			} catch (IOException e) {
+    				// TODO Auto-generated catch block
+    				e.printStackTrace();
+    			}
+    		} catch (ParseException e1) {
+    			// TODO Auto-generated catch block
+    			e1.printStackTrace();
+    		}//End REINDEX
+    	    
+    		}else {//END IF PDE
+            	JOptionPane.showMessageDialog(null,
+    				     "The sketch doesn't contains a PShader class, there isn't any shader in code," +
+    				     "please check your sketch code"
+    				 , //Mensaje
+    				 	    "PShader Missing", //Título
+    				 	    JOptionPane.ERROR_MESSAGE); //Tipo de mensaje
+            
+            }//ELSE PDE
+    	   
+    	    }
+    	}//ADD LOCAL
             
         
         
